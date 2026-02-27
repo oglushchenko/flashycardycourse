@@ -1,15 +1,14 @@
-version: "3.9"
-
 services:
   web:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: flasycardycourse-web
-    env_file:
-      - .env
+    container_name: flashycardycourse-web
     ports:
       - "8080:80"  # host:container
+    env_file:
+      - .env
+      - .env.docker
     environment:
       - NODE_ENV=production
     restart: unless-stopped
@@ -18,10 +17,10 @@ services:
 
   db:
     image: postgres:18
-    container_name: flasycardycourse-db
+    container_name: flashycardycourse-db
     restart: unless-stopped
     environment:
-      - POSTGRES_DB=flasycardycourse
+      - POSTGRES_DB=flashycardycourse
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - PGDATA=/var/lib/postgresql/18/docker
@@ -32,7 +31,7 @@ services:
 
   # pgadmin:
   #   image: dpage/pgadmin4
-  #   container_name: flasycardycourse-pgadmin
+  #   container_name: flashycardycourse-pgadmin
   #   restart: unless-stopped
   #   environment:
   #     - PGADMIN_DEFAULT_EMAIL=admin@example.com
