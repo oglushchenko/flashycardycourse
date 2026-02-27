@@ -1,12 +1,5 @@
 import type { Metadata } from "next";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider, SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { Poppins } from "next/font/google";
 import { Button } from "@/components/ui/button";
@@ -36,7 +29,7 @@ export default function RootLayout({
             <div className="text-lg font-semibold">Flasycardy Course</div>
             <div className="flex items-center gap-3">
               <SignedOut>
-                <SignInButton mode="modal">
+                <SignInButton mode="modal" forceRedirectUrl="/dashboard">
                   <Button variant="outline" size="sm">
                     Sign in
                   </Button>

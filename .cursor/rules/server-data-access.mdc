@@ -1,16 +1,37 @@
 ---
-description: Enforce Server Components for reads, Server Actions for writes, and Zod-validated typed inputs (no FormData)
+description: Enforce Server Components for reads, Server Actions for writes, Zod-validated typed inputs (no FormData), and db/queries helper functions for all DB access
 alwaysApply: true
 ---
 
 # Data Access & Validation (Next.js)
 
-- **Data retrieval (reads)**: Must be done via **Server Components** (or server-only utilities called by Server Components). Do not fetch DB data in Client Components.
-- **Data mutations (writes)**: Any **insert / update / delete** must be done via **Server Actions** (`"use server"`). Do not write to the DB from Client Components, API routes, or client-side fetch calls.
-- **Validation**: All incoming data to mutations must be validated with **Zod**.
-- **Typed inputs**: Every Server Action must accept a **typed object** input derived from Zod (e.g. `type Input = z.infer<typeof schema>`).
-- **Do not use `FormData` as the input type** for Server Actions. Convert/shape client form values into a typed object, then validate with Zod in the Server Action.
+## Query & Mutation Helpers
 
-- **Still follow existing rules**:
-  - DB access uses Drizzle schema/types from [`src/db/schema.ts`](mdc:src/db/schema.ts)
-  - User scoping/ownership enforced via Clerk (`userId`)
+- **All database interactions** (reads and writes) must go through **helper functions** defined in `src/db/queries/`.
+  - Do **not** call Drizzle directly inside Server Components or Server Actions — always delegate to a query/mutation helper.
+  - Organise helpers by domain (e.g. `src/db/queries/decks.ts`, `src/db/queries/cards.ts`).
+  - Each helper file exports typed async functions (e.g. `getDecksByUserId`, `createDeck`, `deleteDeck`).
+- **Read helpers** (selects) live in `src/db/queries/` and are called from Server Components or server-only utilities.
+- **Mutation helpers** (insert / update / delete) also live in `src/db/queries/` and are called exclusively from Server Actions.
+
+## Data Retrieval (Reads)
+
+- Must be done via **Server Components** (or server-only utilities called by Server Components).
+- Server Components call the appropriate helper from `src/db/queries/` — do not fetch DB data in Client Components.
+
+## Data Mutations (Writes)
+
+- Any **insert / update / delete** must be triggered via **Server Actions** (`"use server"`).
+- Server Actions call the appropriate mutation helper from `src/db/queries/`.
+- Do not write to the DB from Client Components, API routes, or client-side fetch calls.
+
+## Validation
+
+- **All incoming data** to mutations must be validated with **Zod** inside the Server Action before calling the query helper.
+- Every Server Action must accept a **typed object** input derived from Zod (e.g. `type Input = z.infer<typeof schema>`).
+- **Do not use `FormData` as the input type** for Server Actions. Convert/shape client form values into a typed object, then validate with Zod.
+
+## Still follow existing rules
+
+- DB access uses Drizzle schema/types from [`src/db/schema.ts`](mdc:src/db/schema.ts)
+- User scoping/ownership enforced via Clerk (`userId`) — always pass `userId` into query helpers and filter by it
