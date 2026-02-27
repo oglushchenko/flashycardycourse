@@ -1,0 +1,16 @@
+---
+description: Enforce Server Components for reads, Server Actions for writes, and Zod-validated typed inputs (no FormData)
+alwaysApply: true
+---
+
+# Data Access & Validation (Next.js)
+
+- **Data retrieval (reads)**: Must be done via **Server Components** (or server-only utilities called by Server Components). Do not fetch DB data in Client Components.
+- **Data mutations (writes)**: Any **insert / update / delete** must be done via **Server Actions** (`"use server"`). Do not write to the DB from Client Components, API routes, or client-side fetch calls.
+- **Validation**: All incoming data to mutations must be validated with **Zod**.
+- **Typed inputs**: Every Server Action must accept a **typed object** input derived from Zod (e.g. `type Input = z.infer<typeof schema>`).
+- **Do not use `FormData` as the input type** for Server Actions. Convert/shape client form values into a typed object, then validate with Zod in the Server Action.
+
+- **Still follow existing rules**:
+  - DB access uses Drizzle schema/types from [`src/db/schema.ts`](mdc:src/db/schema.ts)
+  - User scoping/ownership enforced via Clerk (`userId`)

@@ -1,0 +1,36 @@
+---
+alwaysApply: true
+---
+# shadcn/ui Usage in This Project
+
+- **UI library**: This project uses **shadcn/ui** for **all UI elements**.
+- **Preferred components**: When you need buttons, inputs, dialogs, navigation, forms, or other UI pieces, prefer the corresponding shadcn/ui components instead of building custom primitives from scratch (unless there is a strong project-specific reason).
+
+## Initialization
+
+- **If shadcn/ui is not yet initialized in this project**, initialize it with:
+
+```bash
+npx shadcn@latest init
+```
+
+Use this command at the workspace root.
+
+## Adding Components
+
+- **If a particular shadcn/ui component is not yet installed**, add it using:
+
+```bash
+npx shadcn@latest add <component-name>
+```
+
+- For example, to add the `button` component:
+
+```bash
+npx shadcn@latest add button
+```
+
+## General Guidance
+
+- Prefer using shadcn/ui components and their composition patterns (variants, slots, etc.) over ad-hoc styling.
+- Keep styling consistent with shadcn/ui defaults and theming; extend via utility classes only when necessary.

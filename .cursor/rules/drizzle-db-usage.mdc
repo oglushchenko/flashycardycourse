@@ -1,0 +1,17 @@
+---
+description: Enforce using Drizzle schema and queries for all database interactions
+alwaysApply: true
+---
+
+# Database Access with Drizzle
+
+All **database interactions** in this project must use the **Drizzle schema and queries** defined in
+[`src/db/schema.ts`](mdc:src/db/schema.ts).
+
+- **Do not** write raw SQL queries directly in application code.
+- **Do not** create ad-hoc table definitions outside the Drizzle schema.
+- **Always**:
+  - Use the tables and types exported from [`src/db/schema.ts`](mdc:src/db/schema.ts).
+  - Add or update table definitions in [`src/db/schema.ts`](mdc:src/db/schema.ts) when the schema changes.
+
+This ensures a single source of truth for the database schema and keeps all queries type-safe and consistent.

@@ -1,0 +1,28 @@
+---
+description: All auth is handled by Clerk and all data access must be scoped to the authenticated user.
+alwaysApply: true
+---
+
+# Auth & Data Access with Clerk
+
+- **Authentication provider**: All authentication is handled by **Clerk**. Do not introduce alternative auth mechanisms.
+- **Current user**: Always use Clerk's current-user context (e.g. `userId` from Clerk) as the source of truth for the authenticated user.
+
+## Data Access Rules
+
+- **User isolation**: Users must only ever access their **own data**.
+  - All queries, mutations, and API handlers must be explicitly scoped by the authenticated user's identifier from Clerk.
+  - Never return or operate on records that do not belong to the current user, even if the client provides an ID.
+- **Server-side enforcement**:
+  - Enforce ownership checks **on the server** (API routes, server actions, loaders, etc.), not only in the client UI.
+  - When reading data, always include a filter by the Clerk user identifier (for example, a `userId` column) in the Drizzle query.
+  - When writing data, always set the ownership field (e.g. `userId`) from the Clerk user, not from client input.
+
+## Implementation Notes
+
+- **Authorization checks**:
+  - Before returning or modifying a record, verify that its ownership field matches the current Clerk user.
+  - If the record does not belong to the current user, return an appropriate error (e.g. 403) and do not leak any details.
+- **Multi-tenant safety**:
+  - Never trust IDs from the client alone for authorization decisions.
+  - Avoid "list all" endpoints; lists must always be filtered to the current user's scope.
