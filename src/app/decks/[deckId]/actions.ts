@@ -35,7 +35,7 @@ export async function addCard(input: AddCardInput): Promise<ActionResult> {
     back: parsed.data.back,
   });
 
-  revalidatePath(`/dashboard/decks/${parsed.data.deckId}`);
+  revalidatePath(`/decks/${parsed.data.deckId}`);
   return { success: true };
 }
 
@@ -60,7 +60,7 @@ export async function removeCard(input: DeleteCardInput): Promise<ActionResult> 
 
   await deleteCard(parsed.data.cardId);
 
-  revalidatePath(`/dashboard/decks/${parsed.data.deckId}`);
+  revalidatePath(`/decks/${parsed.data.deckId}`);
   return { success: true };
 }
 
@@ -90,6 +90,6 @@ export async function editCard(input: EditCardInput): Promise<ActionResult> {
     back: parsed.data.back,
   });
 
-  revalidatePath(`/dashboard/decks/${parsed.data.deckId}`);
+  revalidatePath(`/decks/${parsed.data.deckId}`);
   return { success: true };
 }

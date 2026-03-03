@@ -5,8 +5,8 @@ import { getDeckById } from "@/db/queries/decks";
 import { getCardsByDeckId } from "@/db/queries/cards";
 import { AddCardDialog } from "./_components/add-card-dialog";
 import { CardList } from "./_components/card-list";
+import { DeckInformation } from "./_components/deck-information";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, LayersIcon } from "lucide-react";
 
 interface Props {
@@ -38,24 +38,11 @@ export default async function DeckPage({ params }: Props) {
               My Decks
             </Link>
           </Button>
-
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">{deck.title}</h1>
-              {deck.description && (
-                <p className="mt-1 text-muted-foreground">{deck.description}</p>
-              )}
-              <div className="mt-2 flex items-center gap-2">
-                <Badge variant="secondary">
-                  {cards.length} {cards.length === 1 ? "card" : "cards"}
-                </Badge>
-                <span className="text-xs text-muted-foreground">
-                  Updated {new Date(deck.updatedAt).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
-            <AddCardDialog deckId={deck.id} />
-          </div>
+          <DeckInformation
+            deck={deck}
+            cardCount={cards.length}
+            addCardAction={<AddCardDialog deckId={deck.id} />}
+          />
         </div>
 
         {cards.length === 0 ? (

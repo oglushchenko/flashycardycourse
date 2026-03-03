@@ -21,7 +21,7 @@ export function DeckCard({ deck }: { deck: Deck }) {
 
   return (
     <>
-      <Link href={`/dashboard/decks/${deck.id}`} className="block">
+      <Link href={`/decks/${deck.id}`} className="block">
         <Card className="flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer h-full">
           <CardHeader className="flex flex-row items-start justify-between gap-2">
             <div className="min-w-0">
