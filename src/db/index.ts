@@ -1,18 +1,12 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { Client } from 'pg';
+import { Pool } from 'pg';
 
-const client = new Client({
+const pool = new Pool({
   connectionString: process.env.DATABASE_URL!,
 });
 
-export const db = drizzle(client);
+export const db = drizzle(pool);
 
-let isConnected = false;
-
-export async function connectDb() {
-  if (isConnected) return;
-  await client.connect();
-  isConnected = true;
-}
-
+// No-op kept for backwards compatibility — Pool manages connections automatically.
+export async function connectDb() {}

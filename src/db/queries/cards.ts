@@ -1,0 +1,51 @@
+import { asc, eq } from "drizzle-orm";
+import { db, connectDb } from "@/db";
+import { cardsTable } from "@/db/schema";
+
+export type Card = typeof cardsTable.$inferSelect;
+export type NewCard = Pick<typeof cardsTable.$inferInsert, "front" | "back">;
+
+export async function getCardsByDeckId(deckId: number): Promise<Card[]> {
+  await connectDb();
+  return db
+    .select()
+    .from(cardsTable)
+    .where(eq(cardsTable.deckId, deckId))
+    .orderBy(asc(cardsTable.position), asc(cardsTable.createdAt));
+}
+
+export async function insertCard(
+  deckId: number,
+  data: NewCard,
+): Promise<Card> {
+  await connectDb();
+  const existing = await db
+    .select({ position: cardsTable.position })
+    .from(cardsTable)
+    .where(eq(cardsTable.deckId, deckId))
+    .orderBy(asc(cardsTable.position));
+
+  const nextPosition =
+    existing.length > 0 ? existing[existing.length - 1].position + 1 : 0;
+
+  const [card] = await db
+    .insert(cardsTable)
+    .values({ deckId, front: data.front, back: data.back, position: nextPosition })
+    .returning();
+  return card;
+}
+
+export async function deleteCard(cardId: number): Promise<void> {
+  await connectDb();
+  await db.delete(cardsTable).where(eq(cardsTable.id, cardId));
+}
+
+export async function updateCard(cardId: number, data: NewCard): Promise<Card> {
+  await connectDb();
+  const [card] = await db
+    .update(cardsTable)
+    .set({ front: data.front, back: data.back })
+    .where(eq(cardsTable.id, cardId))
+    .returning();
+  return card;
+}
