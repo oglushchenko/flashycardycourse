@@ -28,6 +28,17 @@ export default async function DeckPage({ params }: Props) {
 
   if (!deck) notFound();
 
+  const sortedCards = [...cards].sort((a, b) => {
+    const aUpdatedAt =
+      ((a as { updatedAt?: Date | string | null }).updatedAt ?? a.createdAt) ??
+      0;
+    const bUpdatedAt =
+      ((b as { updatedAt?: Date | string | null }).updatedAt ?? b.createdAt) ??
+      0;
+
+    return new Date(bUpdatedAt).getTime() - new Date(aUpdatedAt).getTime();
+  });
+
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
       <div className="mx-auto max-w-6xl px-4 py-10">
@@ -40,12 +51,12 @@ export default async function DeckPage({ params }: Props) {
           </Button>
           <DeckInformation
             deck={deck}
-            cardCount={cards.length}
+            cardCount={sortedCards.length}
             addCardAction={<AddCardDialog deckId={deck.id} />}
           />
         </div>
 
-        {cards.length === 0 ? (
+        {sortedCards.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-24 text-center">
             <LayersIcon className="mb-4 h-12 w-12 text-muted-foreground/40" />
             <p className="text-lg font-medium text-muted-foreground">
@@ -56,7 +67,7 @@ export default async function DeckPage({ params }: Props) {
             </p>
           </div>
         ) : (
-          <CardList cards={cards} deckId={deck.id} />
+          <CardList cards={sortedCards} deckId={deck.id} />
         )}
       </div>
     </div>

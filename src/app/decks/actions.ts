@@ -30,7 +30,7 @@ export async function createDeck(input: CreateDeckInput): Promise<ActionResult> 
     description: parsed.data.description,
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/decks");
   return { success: true };
 }
 
@@ -57,6 +57,6 @@ export async function updateDeck(input: UpdateDeckInput): Promise<ActionResult> 
   });
   if (!deck) return { success: false, error: "Deck not found" };
 
-  revalidatePath("/dashboard");
+  revalidatePath("/decks");
   return { success: true };
 }

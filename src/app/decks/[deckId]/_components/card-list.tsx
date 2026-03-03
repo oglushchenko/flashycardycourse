@@ -99,19 +99,81 @@ function EditCardDialog({
   );
 }
 
-function CardItem({ card, deckId }: { card: FlashCard; deckId: number }) {
-  const [editOpen, setEditOpen] = useState(false);
+function DeleteCardDialog({
+  card,
+  deckId,
+  open,
+  onOpenChange,
+}: {
+  card: FlashCard;
+  deckId: number;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
+    setError(null);
     startTransition(async () => {
-      await removeCard({ cardId: card.id, deckId });
+      const result = await removeCard({ cardId: card.id, deckId });
+      if (result.success) {
+        onOpenChange(false);
+      } else {
+        setError(result.error);
+      }
     });
   }
 
   return (
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) setError(null);
+        onOpenChange(nextOpen);
+      }}
+    >
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Delete card?</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. The selected flashcard will be permanently removed.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+          {card.front}
+        </div>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={handleDelete}
+            disabled={isPending}
+          >
+            {isPending ? "Deleting…" : "Delete card"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CardItem({ card, deckId }: { card: FlashCard; deckId: number }) {
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  return (
     <>
-      <Card className={isPending ? "opacity-50" : ""}>
+      <Card>
         <CardHeader className="flex flex-row items-start justify-between gap-4 pb-2">
           <p className="text-sm font-medium leading-snug">{card.front}</p>
           <div className="flex shrink-0 gap-1">
@@ -120,7 +182,6 @@ function CardItem({ card, deckId }: { card: FlashCard; deckId: number }) {
               size="icon"
               className="h-7 w-7 text-muted-foreground hover:text-foreground"
               onClick={() => setEditOpen(true)}
-              disabled={isPending}
               aria-label="Edit card"
             >
               <Pencil className="h-4 w-4" />
@@ -129,8 +190,7 @@ function CardItem({ card, deckId }: { card: FlashCard; deckId: number }) {
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-muted-foreground hover:text-destructive"
-              onClick={handleDelete}
-              disabled={isPending}
+              onClick={() => setDeleteOpen(true)}
               aria-label="Delete card"
             >
               <Trash2 className="h-4 w-4" />
@@ -148,6 +208,12 @@ function CardItem({ card, deckId }: { card: FlashCard; deckId: number }) {
         deckId={deckId}
         open={editOpen}
         onOpenChange={setEditOpen}
+      />
+      <DeleteCardDialog
+        card={card}
+        deckId={deckId}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
       />
     </>
   );
