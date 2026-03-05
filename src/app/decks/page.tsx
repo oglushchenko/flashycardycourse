@@ -6,10 +6,12 @@ import { DeckCard } from "./_components/deck-card";
 import { CreateDeckDialog } from "./_components/create-deck-dialog";
 
 export default async function DecksPage() {
-  const { userId } = await auth();
+  const { userId, has } = await auth();
   if (!userId) redirect("/");
 
   const decks = await getDecksByUserId(userId);
+
+  const atDeckLimit = has({ feature: "3_deck_limit" }) && decks.length >= 3;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
@@ -23,7 +25,7 @@ export default async function DecksPage() {
                 : `${decks.length} deck${decks.length === 1 ? "" : "s"}`}
             </p>
           </div>
-          <CreateDeckDialog />
+          <CreateDeckDialog atDeckLimit={atDeckLimit} />
         </div>
 
         {decks.length === 0 ? (

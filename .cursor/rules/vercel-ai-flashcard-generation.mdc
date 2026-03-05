@@ -1,0 +1,48 @@
+---
+description: How to use the Vercel AI SDK to generate AI flashcards with structured output
+alwaysApply: false
+---
+
+# AI Flashcard Generation with Vercel AI SDK
+
+Use the `ai` npm package with `generateText` and `Output.object` to generate structured flashcard arrays.
+
+## Schema Pattern
+
+```typescript
+import { generateText, Output } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { z } from 'zod';
+
+const { output } = await generateText({
+  model: openai('gpt-4o'),
+  output: Output.object({
+    schema: z.object({
+      cards: z.array(
+        z.object({
+          front: z.string(),
+          back: z.string(),
+        })
+      ),
+    }),
+  }),
+  prompt: `Generate ${count} flashcards about: ${topic}`,
+});
+
+// output.cards is Card[]
+```
+
+## Rules
+
+- Always use `Output.object` with a Zod schema — never parse raw text manually.
+- Always call AI generation from a **Server Action** (`"use server"`), never from a Client Component.
+- Gate AI generation behind the `ai_flashcard_generation` feature using `has()` before invoking the model.
+
+```typescript
+import { auth } from '@clerk/nextjs/server';
+
+const { has } = await auth();
+if (!has({ feature: 'ai_flashcard_generation' })) {
+  throw new Error('Upgrade to Pro to use AI flashcard generation.');
+}
+```

@@ -6,6 +6,7 @@ import { getCardsByDeckId } from "@/db/queries/cards";
 import { AddCardDialog } from "./_components/add-card-dialog";
 import { CardList } from "./_components/card-list";
 import { DeckInformation } from "./_components/deck-information";
+import { DeleteDeckDialog } from "./_components/delete-deck-dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, LayersIcon } from "lucide-react";
 
@@ -53,6 +54,9 @@ export default async function DeckPage({ params }: Props) {
             deck={deck}
             cardCount={sortedCards.length}
             addCardAction={<AddCardDialog deckId={deck.id} />}
+            deleteDeckAction={
+              <DeleteDeckDialog deckId={deck.id} deckTitle={deck.title} />
+            }
           />
         </div>
 

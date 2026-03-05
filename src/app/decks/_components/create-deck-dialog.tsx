@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,9 +16,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createDeck } from "../actions";
-import { Plus } from "lucide-react";
+import { Lock, Plus } from "lucide-react";
 
-export function CreateDeckDialog() {
+interface CreateDeckDialogProps {
+  atDeckLimit?: boolean;
+}
+
+export function CreateDeckDialog({ atDeckLimit = false }: CreateDeckDialogProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -37,6 +42,17 @@ export function CreateDeckDialog() {
         setError(result.error);
       }
     });
+  }
+
+  if (atDeckLimit) {
+    return (
+      <Button asChild variant="outline">
+        <Link href="/pricing">
+          <Lock className="mr-2 h-4 w-4" />
+          Upgrade to Add More Decks
+        </Link>
+      </Button>
+    );
   }
 
   return (

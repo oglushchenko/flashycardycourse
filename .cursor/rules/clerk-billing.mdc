@@ -1,0 +1,77 @@
+---
+description: Clerk Billing integration for subscriptions, plans, and feature access gating
+alwaysApply: true
+---
+
+# Clerk Billing
+
+All subscription and payment handling uses **Clerk Billing** exclusively. Do not use Stripe directly or any other payment/subscription library.
+
+## Plans & Features
+
+Available **plans** (use exact slugs):
+- `free_user`
+- `pro`
+
+Available **features** (use exact slugs):
+- `3_deck_limit`
+- `unlimited_decks`
+- `ai_flashcard_generation`
+
+## Pricing Page
+
+Use the `<PricingTable />` component from `@clerk/nextjs` on a dedicated pricing page:
+
+```tsx
+import { PricingTable } from '@clerk/nextjs'
+
+export default function PricingPage() {
+  return (
+    <div>
+      <PricingTable />
+    </div>
+  )
+}
+```
+
+## Gating Access — Server Components
+
+Use `has()` from the `auth()` object in Server Components and Server Actions:
+
+```tsx
+import { auth } from '@clerk/nextjs/server'
+
+const { has } = await auth()
+
+// Check plan
+const isPro = has({ plan: 'pro' })
+
+// Check feature
+const canGenerateAI = has({ feature: 'ai_flashcard_generation' })
+const hasUnlimitedDecks = has({ feature: 'unlimited_decks' })
+```
+
+## Gating Access — Client / JSX
+
+Use the `<Show>` component from `@clerk/nextjs` to conditionally render UI:
+
+```tsx
+import { Show } from '@clerk/nextjs'
+
+<Show
+  when={{ feature: 'ai_flashcard_generation' }}
+  fallback={<p>Upgrade to Pro to use AI flashcard generation.</p>}
+>
+  <AIGenerateButton />
+</Show>
+
+<Show when={{ plan: 'pro' }} fallback={<UpgradeBanner />}>
+  <ProOnlyFeature />
+</Show>
+```
+
+## Rules
+
+- **Always use `has()` server-side** to enforce access — never trust client-side checks alone.
+- **Never hardcode plan/feature logic** outside of `has()` or `<Show>` — always use the Clerk helpers.
+- Deck creation must enforce `3_deck_limit` for `free_user` plan users on the server (in Server Actions).

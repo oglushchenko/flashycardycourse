@@ -2,8 +2,9 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
-import { insertDeck, updateDeck as updateDeckQuery } from "@/db/queries/decks";
+import { getDecksByUserId, insertDeck, updateDeck as updateDeckQuery, deleteDeck as deleteDeckQuery } from "@/db/queries/decks";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 const createDeckSchema = z.object({
   title: z.string().min(1, "Title is required").max(255),
@@ -17,8 +18,18 @@ export type ActionResult =
   | { success: false; error: string };
 
 export async function createDeck(input: CreateDeckInput): Promise<ActionResult> {
-  const { userId } = await auth();
+  const { userId, has } = await auth();
   if (!userId) return { success: false, error: "Unauthorized" };
+
+  if (has({ feature: "3_deck_limit" })) {
+    const existingDecks = await getDecksByUserId(userId);
+    if (existingDecks.length >= 3) {
+      return {
+        success: false,
+        error: "You've reached the 3-deck limit on the free plan. Upgrade to Pro to create unlimited decks.",
+      };
+    }
+  }
 
   const parsed = createDeckSchema.safeParse(input);
   if (!parsed.success) {
@@ -59,4 +70,26 @@ export async function updateDeck(input: UpdateDeckInput): Promise<ActionResult> 
 
   revalidatePath("/decks");
   return { success: true };
+}
+
+const deleteDeckSchema = z.object({
+  deckId: z.number().int().positive(),
+});
+
+export type DeleteDeckInput = z.infer<typeof deleteDeckSchema>;
+
+export async function deleteDeck(input: DeleteDeckInput): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return { success: false, error: "Unauthorized" };
+
+  const parsed = deleteDeckSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0].message };
+  }
+
+  const deleted = await deleteDeckQuery(userId, parsed.data.deckId);
+  if (!deleted) return { success: false, error: "Deck not found" };
+
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
 }

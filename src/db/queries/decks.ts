@@ -60,3 +60,15 @@ export async function updateDeck(
     .returning();
   return deck;
 }
+
+export async function deleteDeck(
+  userId: string,
+  deckId: number,
+): Promise<boolean> {
+  await connectDb();
+  const [deleted] = await db
+    .delete(decksTable)
+    .where(and(eq(decksTable.id, deckId), eq(decksTable.userId, userId)))
+    .returning({ id: decksTable.id });
+  return !!deleted;
+}

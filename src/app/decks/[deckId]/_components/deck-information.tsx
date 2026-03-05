@@ -11,12 +11,14 @@ interface DeckInformationProps {
   deck: Deck;
   cardCount: number;
   addCardAction: ReactNode;
+  deleteDeckAction: ReactNode;
 }
 
 export function DeckInformation({
   deck,
   cardCount,
   addCardAction,
+  deleteDeckAction,
 }: DeckInformationProps) {
   const hasCards = cardCount > 0;
 
@@ -40,7 +42,10 @@ export function DeckInformation({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">{addCardAction}</div>
+        <div className="flex items-center gap-2">
+          {addCardAction}
+          {deleteDeckAction}
+        </div>
       </CardHeader>
       <CardContent className="pt-0">
         {hasCards ? (
