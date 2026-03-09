@@ -55,7 +55,9 @@ export async function generateAICards(
         ),
       }),
     }),
-    prompt: `Generate 20 flashcards about: ${topic}. Each card should have a concise question on the front and a clear, accurate answer on the back.`,
+    prompt: `Generate 20 flashcards for the following deck: "${topic}".
+
+Infer the most natural card format from the deck's topic and purpose. The front and back of each card should contain only what is genuinely useful for someone studying that topic — nothing more. Avoid padding, rephrasing the front on the back, or adding descriptions that don't aid recall.`,
   });
 
   await bulkInsertCards(parsed.data.deckId, output.cards);
