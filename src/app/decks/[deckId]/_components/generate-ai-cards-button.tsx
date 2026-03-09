@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,32 +10,39 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { generateAICards } from "../actions";
+import { EditDeckDialog } from "@/app/decks/_components/edit-deck-dialog";
 
 interface GenerateAICardsButtonProps {
-  deckId: number;
+  deck: { id: number; title: string; description: string | null };
   hasAIFeature: boolean;
 }
 
 export function GenerateAICardsButton({
-  deckId,
+  deck,
   hasAIFeature,
 }: GenerateAICardsButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [editOpen, setEditOpen] = useState(false);
+
+  const hasDescription = Boolean(deck.description?.trim());
 
   function handleClick() {
     if (!hasAIFeature) {
       router.push("/pricing");
       return;
     }
+    if (!hasDescription) {
+      setEditOpen(true);
+      return;
+    }
     startTransition(async () => {
-      await generateAICards({ deckId });
+      await generateAICards({ deckId: deck.id });
     });
   }
 
   const button = (
     <Button
-      variant="outline"
       onClick={handleClick}
       disabled={isPending}
     >
@@ -56,6 +63,24 @@ export function GenerateAICardsButton({
           <p>AI flashcard generation is a Pro feature. Click to upgrade.</p>
         </TooltipContent>
       </Tooltip>
+    );
+  }
+
+  if (!hasDescription) {
+    return (
+      <>
+        <Tooltip>
+          <TooltipTrigger asChild>{button}</TooltipTrigger>
+          <TooltipContent>
+            <p>Add a description to your deck to use AI generation.</p>
+          </TooltipContent>
+        </Tooltip>
+        <EditDeckDialog
+          deck={deck}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+        />
+      </>
     );
   }
 

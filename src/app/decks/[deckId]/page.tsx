@@ -58,7 +58,7 @@ export default async function DeckPage({ params }: Props) {
             cardCount={sortedCards.length}
             generateAIAction={
               <GenerateAICardsButton
-                deckId={deck.id}
+                deck={deck}
                 hasAIFeature={hasAIFeature}
               />
             }
