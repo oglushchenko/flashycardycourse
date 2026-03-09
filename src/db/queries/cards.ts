@@ -35,6 +35,30 @@ export async function insertCard(
   return card;
 }
 
+export async function bulkInsertCards(
+  deckId: number,
+  cards: NewCard[],
+): Promise<Card[]> {
+  await connectDb();
+  const existing = await db
+    .select({ position: cardsTable.position })
+    .from(cardsTable)
+    .where(eq(cardsTable.deckId, deckId))
+    .orderBy(asc(cardsTable.position));
+
+  const startPosition =
+    existing.length > 0 ? existing[existing.length - 1].position + 1 : 0;
+
+  const values = cards.map((card, i) => ({
+    deckId,
+    front: card.front,
+    back: card.back,
+    position: startPosition + i,
+  }));
+
+  return db.insert(cardsTable).values(values).returning();
+}
+
 export async function deleteCard(cardId: number): Promise<void> {
   await connectDb();
   await db.delete(cardsTable).where(eq(cardsTable.id, cardId));

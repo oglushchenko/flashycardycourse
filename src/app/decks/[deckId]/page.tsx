@@ -7,6 +7,7 @@ import { AddCardDialog } from "./_components/add-card-dialog";
 import { CardList } from "./_components/card-list";
 import { DeckInformation } from "./_components/deck-information";
 import { DeleteDeckDialog } from "./_components/delete-deck-dialog";
+import { GenerateAICardsButton } from "./_components/generate-ai-cards-button";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, LayersIcon } from "lucide-react";
 
@@ -15,8 +16,10 @@ interface Props {
 }
 
 export default async function DeckPage({ params }: Props) {
-  const { userId } = await auth();
+  const { userId, has } = await auth();
   if (!userId) redirect("/");
+
+  const hasAIFeature = has({ feature: "ai_flashcard_generation" });
 
   const { deckId: deckIdParam } = await params;
   const deckId = Number(deckIdParam);
@@ -53,6 +56,12 @@ export default async function DeckPage({ params }: Props) {
           <DeckInformation
             deck={deck}
             cardCount={sortedCards.length}
+            generateAIAction={
+              <GenerateAICardsButton
+                deckId={deck.id}
+                hasAIFeature={hasAIFeature}
+              />
+            }
             addCardAction={<AddCardDialog deckId={deck.id} />}
             deleteDeckAction={
               <DeleteDeckDialog deckId={deck.id} deckTitle={deck.title} />

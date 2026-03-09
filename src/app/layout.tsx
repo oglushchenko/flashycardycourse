@@ -3,6 +3,7 @@ import { ClerkProvider, SignedIn, SignedOut, SignInButton, SignUpButton, UserBut
 import { dark } from "@clerk/themes";
 import { Poppins } from "next/font/google";
 import { Button } from "@/components/ui/button";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -43,7 +44,7 @@ export default function RootLayout({
               </SignedIn>
             </div>
           </header>
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
         </body>
       </html>
     </ClerkProvider>

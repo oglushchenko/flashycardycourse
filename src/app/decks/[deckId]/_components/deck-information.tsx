@@ -12,6 +12,7 @@ interface DeckInformationProps {
   cardCount: number;
   addCardAction: ReactNode;
   deleteDeckAction: ReactNode;
+  generateAIAction: ReactNode;
 }
 
 export function DeckInformation({
@@ -19,6 +20,7 @@ export function DeckInformation({
   cardCount,
   addCardAction,
   deleteDeckAction,
+  generateAIAction,
 }: DeckInformationProps) {
   const hasCards = cardCount > 0;
 
@@ -42,7 +44,8 @@ export function DeckInformation({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {generateAIAction}
           {addCardAction}
           {deleteDeckAction}
         </div>
