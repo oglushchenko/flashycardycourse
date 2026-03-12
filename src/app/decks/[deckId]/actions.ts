@@ -114,7 +114,7 @@ export async function removeCard(input: DeleteCardInput): Promise<ActionResult> 
   const deck = await getDeckById(userId, parsed.data.deckId);
   if (!deck) return { success: false, error: "Deck not found" };
 
-  await deleteCard(parsed.data.cardId);
+  await deleteCard(parsed.data.cardId, parsed.data.deckId);
 
   revalidatePath(`/decks/${parsed.data.deckId}`);
   return { success: true };
@@ -141,7 +141,7 @@ export async function editCard(input: EditCardInput): Promise<ActionResult> {
   const deck = await getDeckById(userId, parsed.data.deckId);
   if (!deck) return { success: false, error: "Deck not found" };
 
-  await updateCard(parsed.data.cardId, {
+  await updateCard(parsed.data.cardId, parsed.data.deckId, {
     front: parsed.data.front,
     back: parsed.data.back,
   });

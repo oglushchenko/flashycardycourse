@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { db, connectDb } from "@/db";
 import { cardsTable } from "@/db/schema";
 
@@ -59,17 +59,19 @@ export async function bulkInsertCards(
   return db.insert(cardsTable).values(values).returning();
 }
 
-export async function deleteCard(cardId: number): Promise<void> {
+export async function deleteCard(cardId: number, deckId: number): Promise<void> {
   await connectDb();
-  await db.delete(cardsTable).where(eq(cardsTable.id, cardId));
+  await db
+    .delete(cardsTable)
+    .where(and(eq(cardsTable.id, cardId), eq(cardsTable.deckId, deckId)));
 }
 
-export async function updateCard(cardId: number, data: NewCard): Promise<Card> {
+export async function updateCard(cardId: number, deckId: number, data: NewCard): Promise<Card> {
   await connectDb();
   const [card] = await db
     .update(cardsTable)
     .set({ front: data.front, back: data.back })
-    .where(eq(cardsTable.id, cardId))
+    .where(and(eq(cardsTable.id, cardId), eq(cardsTable.deckId, deckId)))
     .returning();
   return card;
 }
