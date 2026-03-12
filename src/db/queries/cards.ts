@@ -1,17 +1,22 @@
 import { and, asc, eq } from "drizzle-orm";
 import { db, connectDb } from "@/db";
-import { cardsTable } from "@/db/schema";
+import { cardsTable, decksTable } from "@/db/schema";
 
 export type Card = typeof cardsTable.$inferSelect;
 export type NewCard = Pick<typeof cardsTable.$inferInsert, "front" | "back">;
 
-export async function getCardsByDeckId(deckId: number): Promise<Card[]> {
+export async function getCardsByDeckId(userId: string, deckId: number): Promise<Card[]> {
   await connectDb();
-  return db
-    .select()
+  const rows = await db
+    .select({ card: cardsTable })
     .from(cardsTable)
+    .innerJoin(
+      decksTable,
+      and(eq(cardsTable.deckId, decksTable.id), eq(decksTable.userId, userId)),
+    )
     .where(eq(cardsTable.deckId, deckId))
     .orderBy(asc(cardsTable.position), asc(cardsTable.createdAt));
+  return rows.map((r) => r.card);
 }
 
 export async function insertCard(
@@ -59,19 +64,21 @@ export async function bulkInsertCards(
   return db.insert(cardsTable).values(values).returning();
 }
 
-export async function deleteCard(cardId: number, deckId: number): Promise<void> {
+export async function deleteCard(cardId: number, deckId: number): Promise<boolean> {
   await connectDb();
-  await db
+  const [deleted] = await db
     .delete(cardsTable)
-    .where(and(eq(cardsTable.id, cardId), eq(cardsTable.deckId, deckId)));
+    .where(and(eq(cardsTable.id, cardId), eq(cardsTable.deckId, deckId)))
+    .returning({ id: cardsTable.id });
+  return !!deleted;
 }
 
-export async function updateCard(cardId: number, deckId: number, data: NewCard): Promise<Card> {
+export async function updateCard(cardId: number, deckId: number, data: NewCard): Promise<Card | null> {
   await connectDb();
   const [card] = await db
     .update(cardsTable)
     .set({ front: data.front, back: data.back })
     .where(and(eq(cardsTable.id, cardId), eq(cardsTable.deckId, deckId)))
     .returning();
-  return card;
+  return card ?? null;
 }

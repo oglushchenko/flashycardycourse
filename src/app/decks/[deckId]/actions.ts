@@ -49,10 +49,10 @@ export async function generateAICards(
       schema: z.object({
         cards: z.array(
           z.object({
-            front: z.string(),
-            back: z.string(),
+            front: z.string().max(2000),
+            back: z.string().max(2000),
           }),
-        ),
+        ).max(20),
       }),
     }),
     prompt: `Generate 20 flashcards for the following deck: "${topic}".
@@ -114,7 +114,8 @@ export async function removeCard(input: DeleteCardInput): Promise<ActionResult> 
   const deck = await getDeckById(userId, parsed.data.deckId);
   if (!deck) return { success: false, error: "Deck not found" };
 
-  await deleteCard(parsed.data.cardId, parsed.data.deckId);
+  const deleted = await deleteCard(parsed.data.cardId, parsed.data.deckId);
+  if (!deleted) return { success: false, error: "Card not found" };
 
   revalidatePath(`/decks/${parsed.data.deckId}`);
   return { success: true };
@@ -141,10 +142,11 @@ export async function editCard(input: EditCardInput): Promise<ActionResult> {
   const deck = await getDeckById(userId, parsed.data.deckId);
   if (!deck) return { success: false, error: "Deck not found" };
 
-  await updateCard(parsed.data.cardId, parsed.data.deckId, {
+  const card = await updateCard(parsed.data.cardId, parsed.data.deckId, {
     front: parsed.data.front,
     back: parsed.data.back,
   });
+  if (!card) return { success: false, error: "Card not found" };
 
   revalidatePath(`/decks/${parsed.data.deckId}`);
   return { success: true };

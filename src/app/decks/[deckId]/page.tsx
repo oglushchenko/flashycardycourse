@@ -27,7 +27,7 @@ export default async function DeckPage({ params }: Props) {
 
   const [deck, cards] = await Promise.all([
     getDeckById(userId, deckId),
-    getCardsByDeckId(deckId),
+    getCardsByDeckId(userId, deckId),
   ]);
 
   if (!deck) notFound();

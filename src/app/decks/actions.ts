@@ -21,6 +21,11 @@ export async function createDeck(input: CreateDeckInput): Promise<ActionResult> 
   const { userId, has } = await auth();
   if (!userId) return { success: false, error: "Unauthorized" };
 
+  const parsed = createDeckSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0].message };
+  }
+
   if (has({ feature: "3_deck_limit" })) {
     const existingDecks = await getDecksByUserId(userId);
     if (existingDecks.length >= 3) {
@@ -29,11 +34,6 @@ export async function createDeck(input: CreateDeckInput): Promise<ActionResult> 
         error: "You've reached the 3-deck limit on the free plan. Upgrade to Pro to create unlimited decks.",
       };
     }
-  }
-
-  const parsed = createDeckSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
   }
 
   await insertDeck(userId, {
@@ -90,6 +90,6 @@ export async function deleteDeck(input: DeleteDeckInput): Promise<ActionResult> 
   const deleted = await deleteDeckQuery(userId, parsed.data.deckId);
   if (!deleted) return { success: false, error: "Deck not found" };
 
-  revalidatePath("/dashboard");
-  redirect("/dashboard");
+  revalidatePath("/decks");
+  redirect("/decks");
 }
